@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="theme-color" content="#2196F3">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Student Helper</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 15px;
+        background: #f5f5f5;
+        color: #222;
+    }
+    h1, h2 { text-align: center; }
+    .container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 18px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+    input, textarea, select {
+        width: 90%;
+        display: block;
+        margin: 8px auto;
+        padding: 11px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+    button, .menuButton, .homeButton {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+        padding: 12px;
+        border: 0;
+        border-radius: 9px;
+        background: #eeeeee;
+        color: #111;
+        text-align: center;
+        text-decoration: none;
+        font-size: 15px;
+        cursor: pointer;
+    }
+    button:active, .menuButton:active { transform: scale(.99); }
+    .task {
+        width: 90%;
+        margin: 10px auto;
+        padding: 12px;
+        background: #f0f0f0;
+        border-radius: 9px;
+        line-height: 1.6;
+    }
+    .welcomeText, .description { text-align: center; }
+    .smallButton { width: auto; display: inline-block; margin: 5px; padding: 8px 12px; }
+    .center { text-align: center; }
+    hr { margin: 25px 0; border: 0; border-top: 1px solid #ddd; }
+    .danger { background: #ffe5e5; }
+</style>
+</>
+
+<body>
+<div class="container">
+
+<h1>🎓 Smart Student Helper</h1>
+
+<div class="dashboard">
+    <h2>🏠 Student Dashboard</h2>
+    <p class="welcomeText">Your personal college productivity assistant 🎓</p>
+    <p class="description">
+        Manage attendance, assignments, timetable, study notes and your study plan in one place.
+    </p>
+
+    <a href="#attendance" class="menuButton">📊 Attendance</a>
+    <a href="#assignments" class="menuButton">📝 Assignments</a>
+    <a href="#timetable" class="menuButton">🕐 Timetable</a>
+    <a href="#notes" class="menuButton">📚 Study Notes</a>
+    <a href="#planner" class="menuButton">🧠 Smart Study Planner</a>
+</div>
+
+<hr>
+
+<h2 id="attendance">📊 Attendance</h2>
+<a href="#" class="homeButton">🏠 Back to Home</a>
+
+<input id="total" type="number" placeholder="Total classes">
+<input id="attended" type="number" placeholder="Classes attended">
+<button onclick="calculateAttendance()">Calculate Attendance</button>
+<div id="result" class="task"></div>
+
+<hr>
+
+<h2 id="assignments">📝 Assignments</h2>
+<a href="#" class="homeButton">🏠 Back to Home</a>
+
+<input id="assignmentName" type="text" placeholder="Enter assignment">
+<input id="assignmentDate" type="date">
+<button onclick="addAssignment()">💾 Save Assignment</button>
+<div id="assignmentList"></div>
+
+<hr>
+
+<h2 id="timetable">🕐 College Timetable</h2>
+<a href="#" class="homeButton">🏠 Back to Home</a>
+
+<div id="timetableList"></div>
+
+<h3 class="center">➕ Add / Change Timetable</h3>
+
+<select id="day">
+    <option value="Monday">Monday</option>
+    <option value="Tuesday">Tuesday</option>
+    <option value="Wednesday">Wednesday</option>
+    <option value="Thursday">Thursday</option>
+    <option value="Friday">Friday</option>
+    <option value="Saturday">Saturday</option>
+</select>
+
+<input id="time" type="text" placeholder="Example: 9:00 AM - 10:00 AM">
+<input id="subjectName" type="text" placeholder="Subject">
+<button onclick="addTimetable()">➕ Add Class</button>
+<button class="danger" onclick="resetTimetable()">↩️ Reset Timetable</button>
+
+<hr>
+
+<h2 id="notes">📚 Study Notes</h2>
+<a href="#" class="homeButton">🏠 Back to Home</a>
+
+<input id="noteSubject" type="text" placeholder="Subject">
+<textarea id="noteText" placeholder="Write a short note..." rows="2"></textarea>
+<button onclick="addNote()">Add Note</button>
+<div id="notesList"></div>
+
+<hr>
+
+<h2 id="planner">🧠 Smart Study Planner</h2>
+<a href="#" class="homeButton">🏠 Back to Home</a>
+
+<input id="studySubject" type="text" placeholder="Enter subject">
+<input id="studyTime" type="number" placeholder="Study time in minutes">
+<button onclick="createStudyPlan()">🧠 Create Study Plan</button>
+<div id="studyPlan"></div>
+
+</div>
+
+<script>
+function calculateAttendance() {
+    let total = Number(document.getElementById("total").value);
+    let attended = Number(document.getElementById("attended").value);
+
+    if (total <= 0 || attended < 0 || attended > total) {
+        document.getElementById("result").innerText = "Please enter valid numbers.";
+        return;
+    }
+
+    let percentage = (attended / total) * 100;
+    let message = percentage >= 75
+        ? "✅ Attendance is good!"
+        : "⚠️ Attendance is low. Attend more classes.";
+
+    document.getElementById("result").innerText =
+        "Attendance: " + percentage.toFixed(2) + "%\n" + message;
+}
+
+/* ASSIGNMENTS */
+function getAssignments() {
+    try {
+        return JSON.parse(localStorage.getItem("smartAssignments")) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function addAssignment() {
+    let name = document.getElementById("assignmentName").value.trim();
+    let date = document.getElementById("assignmentDate").value;
+
+    if (name === "" || date === "") {
+        alert("Please enter assignment and date.");
+        return;
+    }
+
+    let assignments = getAssignments();
+    assignments.push({ name: name, date: date });
+    localStorage.setItem("smartAssignments", JSON.stringify(assignments));
+
+    document.getElementById("assignmentName").value = "";
+    document.getElementById("assignmentDate").value = "";
+    showAssignments();
+}
+
+function showAssignments() {
+    let list = document.getElementById("assignmentList");
+    let assignments = getAssignments();
+    list.innerHTML = "";
+
+    if (assignments.length === 0) {
+        list.innerHTML = "<div class='task'>No assignments saved yet.</div>";
+        return;
+    }
+
+    assignments.forEach(function(item, index) {
+        let box = document.createElement("div");
+        box.className = "task";
+        box.innerHTML =
+            "📝 <b>" + escapeHTML(item.name) + "</b><br>" +
+            "📅 Due: " + escapeHTML(item.date) +
+            "<br><button class='smallButton' onclick='deleteAssignment(" + index + ")'>Delete</button>";
+        list.appendChild(box);
+    });
+}
+
+function deleteAssignment(index) {
+    let assignments = getAssignments();
+    assignments.splice(index, 1);
+    localStorage.setItem("smartAssignments", JSON.stringify(assignments));
+    showAssignments();
+}
+
+/* TIMETABLE */
+const defaultTimetable = [
+    {day:"Monday", time:"9:00 AM - 10:00 AM", subject:"C Programming"},
+    {day:"Monday", time:"11:00 AM - 12:00 PM", subject:"Mathematics"},
+    {day:"Tuesday", time:"9:00 AM - 10:00 AM", subject:"Physics"},
+    {day:"Tuesday", time:"11:00 AM - 12:00 PM", subject:"English"},
+    {day:"Wednesday", time:"9:00 AM - 10:00 AM", subject:"Mathematics"},
+    {day:"Wednesday", time:"11:00 AM - 12:00 PM", subject:"C Programming"},
+    {day:"Thursday", time:"9:00 AM - 10:00 AM", subject:"Physics"},
+    {day:"Thursday", time:"11:00 AM - 12:00 PM", subject:"English"},
+    {day:"Friday", time:"9:00 AM - 10:00 AM", subject:"C Programming"},
+    {day:"Friday", time:"11:00 AM - 12:00 PM", subject:"Mathematics"}
+];
+
+function getTimetable() {
+    try {
+        let data = JSON.parse(localStorage.getItem("smartTimetable"));
+        return Array.isArray(data) ? data : JSON.parse(JSON.stringify(defaultTimetable));
+    } catch (e) {
+        return JSON.parse(JSON.stringify(defaultTimetable));
+    }
+}
+
+function showTimetable() {
+    let list = document.getElementById("timetableList");
+    let data = getTimetable();
+    list.innerHTML = "";
+
+    const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+    days.forEach(function(day) {
+        let classes = data.filter(function(item) {
+            return item.day === day;
+        });
+
+        if (classes.length > 0) {
+            let box = document.createElement("div");
+            box.className = "task";
+            let text = "<b>📅 " + day + "</b><br>";
+
+            classes.forEach(function(item, index) {
+                let realIndex = data.indexOf(item);
+                text += "🕐 " + escapeHTML(item.time) +
+                    " - " + escapeHTML(item.subject) +
+                    " <button class='smallButton' onclick='deleteClass(" + realIndex + ")'>Delete</button><br>";
+            });
+
+            box.innerHTML = text;
+            list.appendChild(box);
+        }
+    });
+
+    if (data.length === 0) {
+        list.innerHTML = "<div class='task'>No classes added.</div>";
+    }
+}
+
+function addTimetable() {
+    let day = document.getElementById("day").value;
+    let time = document.getElementById("time").value.trim();
+    let subject = document.getElementById("subjectName").value.trim();
+
+    if (time === "" || subject === "") {
+        alert("Please enter time and subject.");
+        return;
+    }
+
+    let data = getTimetable();
+    data.push({day: day, time: time, subject: subject});
+    localStorage.setItem("smartTimetable", JSON.stringify(data));
+
+    document.getElementById("time").value = "";
+    document.getElementById("subjectName").value = "";
+    showTimetable();
+}
+
+function deleteClass(index) {
+    let data = getTimetable();
+    data.splice(index, 1);
+    localStorage.setItem("smartTimetable", JSON.stringify(data));
+    showTimetable();
+}
+
+function resetTimetable() {
+    if (confirm("Reset timetable to the example timetable?")) {
+        localStorage.removeItem("smartTimetable");
+        showTimetable();
+    }
+}
+
+/* NOTES */
+function getNotes() {
+    try {
+        return JSON.parse(localStorage.getItem("smartNotes")) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function addNote() {
+    let subject = document.getElementById("noteSubject").value.trim();
+    let note = document.getElementById("noteText").value.trim();
+
+    if (subject === "" || note === "") {
+        alert("Please enter subject and note.");
+        return;
+    }
+
+    let notes = getNotes();
+    notes.push({subject: subject, note: note});
+    localStorage.setItem("smartNotes", JSON.stringify(notes));
+
+    document.getElementById("noteSubject").value = "";
+    document.getElementById("noteText").value = "";
+    showNotes();
+}
+
+function showNotes() {
+    let list = document.getElementById("notesList");
+    let notes = getNotes();
+    list.innerHTML = "";
+
+    if (notes.length === 0) {
+        list.innerHTML = "<div class='task'>No notes saved yet.</div>";
+        return;
+    }
+
+    notes.forEach(function(item, index) {
+        let box = document.createElement("div");
+        box.className = "task";
+        box.innerHTML =
+            "📖 <b>" + escapeHTML(item.subject) + "</b><br>" +
+            escapeHTML(item.note) +
+            "<br><button class='smallButton' onclick='deleteNote(" + index + ")'>Delete</button>";
+        list.appendChild(box);
+    });
+}
+
+function deleteNote(index) {
+    let notes = getNotes();
+    notes.splice(index, 1);
+    localStorage.setItem("smartNotes", JSON.stringify(notes));
+    showNotes();
+}
+
+/* STUDY PLANNER */
+function createStudyPlan() {
+    let subject = document.getElementById("studySubject").value.trim();
+    let time = Number(document.getElementById("studyTime").value);
+
+    if (subject === "" || time <= 0) {
+        alert("Please enter subject and study time.");
+        return;
+    }
+
+    let conceptTime = Math.round(time * 0.4);
+    let practiceTime = Math.round(time * 0.4);
+    let revisionTime = time - conceptTime - practiceTime;
+
+    document.getElementById("studyPlan").innerHTML =
+        "<div class='task'>" +
+        "📚 <b>" + escapeHTML(subject) + "</b><br><br>" +
+        "📖 Concepts: " + conceptTime + " minutes<br>" +
+        "💻 Practice: " + practiceTime + " minutes<br>" +
+        "🔄 Revision: " + revisionTime + " minutes" +
+        "</div>";
+}
+
+function escapeHTML(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* LOAD SAVED DATA */
+showAssignments();
+showTimetable();
+showNotes();
+</script>
+  <script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js")
+            .then(function () {
+                console.log("Service Worker registered");
+            })
+            .catch(function (error) {
+                console.log("Service Worker registration failed:", error);
+            });
+    });
+}
+  </script>
+</body>
+</html>
