@@ -1,7 +1,7 @@
 {
   "name": "ADR's Study Helper",
   "short_name": "Study Helper",
-  "start_url": "SmartStudentHelper_Complete.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3",
