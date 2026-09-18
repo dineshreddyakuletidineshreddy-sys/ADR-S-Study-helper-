@@ -1,7 +1,7 @@
 const CACHE_NAME = "adr-study-helper-v2";
 
 const FILES_TO_CACHE = [
-    "SmartStudentHelper_Complete.html",
+    "index.html",
     "manifest.json",
     "icon.png"
 ];
