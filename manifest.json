@@ -1,6 +1,6 @@
 {
   "name": "ADR's Study Helper",
-"short_name": "Study Helper",.
+"short_name": "Study Helper",
 "description": "A smart study helper for students.",
 "start_url": "index.html",
   "display": "standalone",
