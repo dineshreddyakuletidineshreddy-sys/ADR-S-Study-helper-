@@ -1,8 +1,8 @@
 {
   "name": "ADR's Study Helper",
 "short_name": "Study Helper",
-"description": "A smart study helper for students.",
-"start_url": "index.html",
+"description": "ADR's Study Helper - Learn, Plan and Succeed",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3",
